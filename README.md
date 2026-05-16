@@ -25,5 +25,5 @@ The application is split into two clean tabs:
 ### 1. Installation
 Clone the repository to your local machine:
 ```bash
-git clone [https://github.com/YOUR_USERNAME/BrokerBlast.git](https://github.com/YOUR_USERNAME/BrokerBlast.git)
+git clone https://github.com/LAGkitty/BrokerBlast.git
 cd BrokerBlast
