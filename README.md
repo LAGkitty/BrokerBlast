@@ -1,5 +1,5 @@
 # BrokerBlast 🚀
-
+LAGkit❤️Gemini
 ### 🛑 Trust, Privacy & Transparency First
 **If you do not trust this script, do not use it. Or better yet: look at the code yourself.** This tool requires your email credentials (via an App Password) to send emails on your behalf. Because your security matters, **BrokerBlast is 100% open-source, contains zero hidden tracking, uses absolutely zero third-party packages, and runs entirely on your local machine.** You can read every single line of Python code in `autoprivacy.py` in less than five minutes to verify exactly how your data is handled before entering a single character. If you are still uncomfortable, please do not download or use this software.
 
