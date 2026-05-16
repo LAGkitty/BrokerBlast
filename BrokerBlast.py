@@ -4,11 +4,10 @@ from tkinter import ttk, messagebox
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import threading
+import webbrowser  # Built-in engine to safely open browser links
 
 # =====================================================================
 # DATA BROKER DATABASE (UPDATED 2026)
-# Oracle removed (email decommissioned). Replaced with Intelius.
-# Acxiom updated to their active 'askprivacy' endpoint.
 # =====================================================================
 DATA_BROKERS = [
     {"name": "Acxiom", "email": "askprivacy@acxiom.com"},
@@ -21,22 +20,16 @@ DATA_BROKERS = [
     {"name": "Intelius / PeopleConnect", "email": "privacy@peopleconnect.us"}
 ]
 
-# =====================================================================
-# GUI APPLICATION CLASS
-# =====================================================================
 class PrivacyApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("AutoPrivacy - Data Broker Eraser")
-        self.root.geometry("650x550")
-        self.root.minsize(550, 450)
+        self.root.title("BrokerBlast - Data Broker Eraser")
+        self.root.geometry("650x620")  # Expanded height slightly for the new buttons
+        self.root.minsize(550, 520)
         
-        # Create Notebook for Tabs
         self.notebook = ttk.Notebook(root)
-        # BUGFIX: Using pady=10 (not py=10)
         self.notebook.pack(fill="both", expand=True, padx=10, pady=10)
         
-        # Define Tabs
         self.tab_app = ttk.Frame(self.notebook)
         self.tab_tutorial = ttk.Frame(self.notebook)
         
@@ -46,8 +39,32 @@ class PrivacyApp:
         self.build_app_tab()
         self.build_tutorial_tab()
 
+    # --- HELPER TO OPEN WEB LINKS SAFELY ---
+    def open_url(self, url):
+        webbrowser.open_new_tab(url)
+
     # --- MAIN AUTOMATION INTERFACE ---
     def build_app_tab(self):
+        # NEW SECTION: Quick Resource Links
+        links_frame = ttk.LabelFrame(self.tab_app, text=" ⚡ Quick Resource Links ", padding=10)
+        links_frame.pack(fill="x", padx=10, pady=5)
+        
+        btn_google = ttk.Button(links_frame, text="🔑 Get Google App Password", 
+                                command=lambda: self.open_url("https://myaccount.google.com/apppasswords"))
+        btn_google.grid(row=0, column=0, padx=5, pady=2, sticky="ew")
+        
+        btn_oracle = ttk.Button(links_frame, text="🌐 Oracle Privacy Opt-Out Portal", 
+                                command=lambda: self.open_url("https://www.oracle.com/legal/privacy/privacy-choices.html"))
+        btn_oracle.grid(row=0, column=1, padx=5, pady=2, sticky="ew")
+        
+        btn_github = ttk.Button(links_frame, text="⭐ View Source on GitHub", 
+                                command=lambda: self.open_url("https://github.com/LAGkitty/BrokerBlast"))
+        btn_github.grid(row=0, column=2, padx=5, pady=2, sticky="ew")
+        
+        links_frame.columnconfigure(0, weight=1)
+        links_frame.columnconfigure(1, weight=1)
+        links_frame.columnconfigure(2, weight=1)
+
         # Configuration Frame
         config_frame = ttk.LabelFrame(self.tab_app, text=" Step 1: Email Configuration ", padding=10)
         config_frame.pack(fill="x", padx=10, pady=5)
@@ -99,28 +116,28 @@ class PrivacyApp:
         tutorial_text = tk.Text(self.tab_tutorial, wrap="word", padx=15, pady=15, font=("Arial", 10))
         tutorial_text.pack(fill="both", expand=True)
         
-        tutorial_content = """# AutoPrivacy Script Tutorial & Guide
+        tutorial_content = """# BrokerBlast Script Tutorial & Guide
 
-Welcome to the Data Broker Eraser app! This tool automates the process of exercising your GDPR Article 17 "Right to Be Forgotten" by emailing legal data removal demands directly to data broker infrastructure.
+Welcome to BrokerBlast! This tool automates the process of exercising your GDPR Article 17 "Right to Be Forgotten" by emailing legal data removal demands directly to data broker infrastructure.
 
 ## 🛠 Prerequisites: Getting a Google App Password
-Standard passwords will NOT work with this tool because Google blocks automated scripts from logging in directly for security profiles.
+Standard passwords will NOT work with this tool because Google blocks automated scripts from logging in directly for security reasons.
 
-Follow these quick steps to get a usable password:
+You can use the 'Get Google App Password' shortcut button on the main tab to jump straight to the page, or navigate manually:
 1. Go to your Google Account Dashboard (https://myaccount.google.com).
 2. Click on 'Security' in the left-hand navigation pane.
 3. Scroll down to 'How you sign in to Google' and verify that '2-Step Verification' is turned ON.
 4. Click inside '2-Step Verification', scroll all the way to the absolute bottom of the screen, and click 'App passwords'.
-5. Enter an app name (e.g., "Privacy Script") and click 'Create'.
-6. Google will give you a 16-character code. Copy this code directly into the 'Google App Password' field on the first tab of this application.
+5. Enter an app name (e.g., "BrokerBlast") and click 'Create'.
+6. Google will give you a 16-character code. Copy this code directly into the 'Google App Password' field.
+
+## 📦 Missing Endpoints
+Some companies like Oracle Data Cloud have decommissioned their incoming public privacy mailboxes. To opt-out of their networks, use the quick shortcut button on the main automation screen to launch their standalone web portal.
 
 ## 📈 Execution
-1. Fill in your Name, Phone Number, and Primary Email exactly as they appear across online profiles (use international formatting for numbers).
+1. Fill in your Name, Phone Number, and Primary Email exactly as they appear across online profiles.
 2. Hit 'Blast Deletion Requests'.
 3. Keep an eye on your actual Gmail inbox over the next 48 hours. Several data brokers will automatically reply with confirmation or verification links that you MUST click to confirm ownership.
-
----
-Disclaimer: This software acts as an automated transport mechanism for processing user-specified legal communications. Use responsibly.
 """
         tutorial_text.insert("1.0", tutorial_content)
         tutorial_text.config(state="disabled")
@@ -133,14 +150,12 @@ Disclaimer: This software acts as an automated transport mechanism for processin
         self.txt_log.config(state="disabled")
 
     def start_automation_thread(self):
-        # Validate inputs are not empty
         if not all([self.ent_email_sender.get(), self.ent_email_pass.get(), 
                     self.ent_name.get(), self.ent_phone.get(), self.ent_target_email.get()]):
             messagebox.showwarning("Missing Fields", "Please populate all configuration and target data fields before continuing.")
             return
             
         self.btn_run.config(state="disabled")
-        # Run execution inside a separate worker thread to prevent GUI freezing
         threading.Thread(target=self.execute_blast, daemon=True).start()
 
     def execute_blast(self):
@@ -201,16 +216,11 @@ Sincerely,
         server.quit()
         self.log("\n=======================================================")
         self.log("🎉 Automation Loop Finished!")
-        self.log("Check your inbox for incoming verification tickets.")
         self.log("=======================================================")
         
-        # Re-enable button on complete
         self.root.after(0, lambda: self.btn_run.config(state="normal"))
         messagebox.showinfo("Success", "All privacy requests have been broadcast successfully!")
 
-# =====================================================================
-# RUN APPLICATION ENTRYPOINT
-# =====================================================================
 if __name__ == "__main__":
     root = tk.Tk()
     app = PrivacyApp(root)
